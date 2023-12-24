@@ -26,7 +26,7 @@ const interchainTokenFactoryContractAddress =
 // Initialize salt
 const salt = "0x" + crypto.randomBytes(32).toString("hex");
 
-// Register and Deploy
+// Register and Deploy : Linea
 async function registerAndDeploy() {
   const [owner] = await ethers.getSigners();
 
@@ -102,7 +102,7 @@ async function registerAndDeploy() {
   // expectedTokenAddress:  0x2874FfE68D1d230e5a44ca21D30DE28b9b5b648E
 }
 
-// Deploy to remote chain
+// Deploy to remote chain: Polygon
 async function deployToRemoteChain() {
   const [owner] = await ethers.getSigners();
 
@@ -127,7 +127,7 @@ async function deployToRemoteChain() {
   // txn: 0x13d2667cb5391ac13ed96aa530675ac33ae595189c9e4ba75d82486e83b3857b
 }
 
-// Transfer tokens
+// Transfer tokens: Linea -> Polygon
 async function transferTokens() {
   const [owner] = await ethers.getSigners();
 

@@ -8,6 +8,7 @@ const crypto = require("crypto");
 
 const interchainTokenServiceContractABI = require("../utils/its/interchainTokenServiceABI");
 const interchainTokenFactoryContractABI = require("../utils/its/interchainTokenFactoryABI");
+const customTokenContractABI = require("../utils/token/customTokenABI");
 
 const MESSAGE_TYPE_INTERCHAIN_TRANSFER = 0;
 const MESSAGE_TYPE_DEPLOY_INTERCHAIN_TOKEN = 1;
@@ -21,9 +22,9 @@ const interchainTokenServiceContractAddress =
   "0xB5FB4BE02232B1bBA4dC8f81dc24C26980dE9e3C";
 const interchainTokenFactoryContractAddress =
   "0x83a93500d23Fbc3e82B410aD07A6a9F7A0670D66";
-const customTokenAddress = "0x4a7313351ea46F8bbca56375AD7D2464727DfeA4";
+const customTokenAddress = "0xF7952f5fCE0F8744aC97B3415236Ed463118D2fd"; // Polygon: GFToken
 
-// registerCanonicalInterchainToken
+// registerCanonicalInterchainToken : Polygon
 async function registerCanonicalInterchainToken() {
   const [owner] = await ethers.getSigners();
 
@@ -41,6 +42,13 @@ async function registerCanonicalInterchainToken() {
 
   console.log("owner.address: ", owner.address);
 
+  const txn =
+    await interchainTokenFactoryContract.registerCanonicalInterchainToken(
+      customTokenAddress
+    );
+
+  console.log("txn: ", txn);
+
   const tokenId =
     await interchainTokenFactoryContract.canonicalInterchainTokenId(
       customTokenAddress
@@ -48,44 +56,18 @@ async function registerCanonicalInterchainToken() {
 
   console.log("tokenId: ", tokenId);
 
-  let txn =
-    await interchainTokenFactoryContract.registerCanonicalInterchainToken(
-      customTokenAddress
-    );
-
-  console.log("txn: ", txn);
-
-  // Use this payload to listen to different event during deployment
-
-  //   const params = ethers.utils.defaultAbiCoder.encode(
-  //     ["bytes", "address"],
-  //     [owner.address, customTokenAddress]
-  //   );
-
-  //   const payload = ethers.utils.defaultAbiCoder.encode(
-  //     ["uint256", "bytes32", "string", "string", "uint8", "bytes"],
-  //     [
-  //       MESSAGE_TYPE_DEPLOY_INTERCHAIN_TOKEN,
-  //       tokenId,
-  //       "TCToken20",
-  //       "TCT20",
-  //       18,
-  //       owner.address,
-  //     ]
-  //   );
-
   const expectedTokenManagerAddress =
     await interchainTokenServiceContract.tokenManagerAddress(tokenId);
 
   console.log("expectedTokenManagerAddress: ", expectedTokenManagerAddress);
 
-  //   owner.address:  0x510e5EA32386B7C48C4DEEAC80e86859b5e2416C
-  //   tokenId:  0xfc483c4930285c8605fee66a31a5045bf29a7b9ecf2aefa4cea44ea4b74bf395
-  //   txn_hash: '0xdb6db9755a9c6447b99e0807a270b49fbabbc95ca809e4d0143549d08c04b216'
-  //   expectedTokenManagerAddress:  0xa9a23B6388F36CBB15d1bDB4B710E39394B680e5
+  // owner.address:  0x510e5EA32386B7C48C4DEEAC80e86859b5e2416C
+  // txn_hash: '0x9fedfe1e6309db4a22a1930e9aa34a86f28dda4253573062d4193d92b7a0f30e',
+  // tokenId:  0x66a22b3aa9e944b14a426f5d5362fa285be898f487323b5bd6c28677790747de
+  // expectedTokenManagerAddress:  0xd608C9b5aE8F6eebbB3774011164000cbC063052
 }
 
-// deployRemoteCanonicalInterchainToken
+// deployRemoteCanonicalInterchainToken: On Avalanche
 async function deployRemoteCanonicalInterchainToken() {
   const [owner] = await ethers.getSigners();
 
@@ -99,18 +81,19 @@ async function deployRemoteCanonicalInterchainToken() {
     await interchainTokenFactoryContract.deployRemoteCanonicalInterchainToken(
       "Polygon",
       customTokenAddress,
-      "Fantom",
+      "Avalanche",
       ethers.utils.parseEther("0.01"),
-
-      { value: ethers.utils.parseEther("0.01"), gasLimit: 3000000 }
+      { value: ethers.utils.parseEther("0.02"), gasLimit: 3000000 }
     );
 
   console.log("txn: ", txn);
 
-  // txn: 0xfdd59faa45020ea1f2d816959c86fa9ea8d1fdbec04513e6a691ddeda72efcbc
+  // txn: 0x7d722b5db5726da031b31b1ae154da92c4653c6e8640441501691f2abb45be40
+  // https://mumbai.polygonscan.com/tx/0x7d722b5db5726da031b31b1ae154da92c4653c6e8640441501691f2abb45be40
+  // On Axelar:  https://testnet.axelarscan.io/gmp/0x7d722b5db5726da031b31b1ae154da92c4653c6e8640441501691f2abb45be40
 }
 
-// Transfer tokens
+// Transfer tokens : Polygon -> Avalanche
 async function transferTokens() {
   const [owner] = await ethers.getSigners();
 
@@ -120,26 +103,47 @@ async function transferTokens() {
     owner
   );
 
+  // Approve ITS to spend tokens
+  const customTokenContract = new ethers.Contract(
+    customTokenAddress,
+    customTokenContractABI,
+    owner
+  );
+
+  const approve = await customTokenContract.approve(
+    interchainTokenServiceContractAddress,
+    ethers.utils.parseEther("50")
+  );
+
+  console.log("approve: ", approve);
+
   const transfer = await interchainTokenServiceContract.interchainTransfer(
-    "0xfc483c4930285c8605fee66a31a5045bf29a7b9ecf2aefa4cea44ea4b74bf395",
-    "Fantom",
+    "0x66a22b3aa9e944b14a426f5d5362fa285be898f487323b5bd6c28677790747de",
+    "Avalanche",
     "0x510e5EA32386B7C48C4DEEAC80e86859b5e2416C",
     ethers.utils.parseEther("50"),
     "0x",
-    { value: ethers.utils.parseEther("0.1"), gasLimit: 3000000 }
+    ethers.utils.parseEther("0.2"),
+    {
+      // Transaction options should be passed here as an object
+      value: ethers.utils.parseEther("0.2"), // Sending ether as the transaction value
+      gasLimit: 3000000, // Specifying the gas limit
+    }
   );
 
   console.log("transfer: ", transfer);
 
-  //txn: 0xc34b402d84bdc32dd3884aca1868f53bd5fc87d98a9931ea682a8b54d693d980
+  // Approve txn: 0x7dc1ffd42d8c80e1e5ec586a54da5d3f9dc4b450f8ca6687c32733ea09369cb5
+  // Transfer txn: 0x47e9b9868c8f073afc92b7b99acdf07f2c937b7297c6897a97c5c5af3b1c1592
+  // https://testnet.axelarscan.io/gmp/0x47e9b9868c8f073afc92b7b99acdf07f2c937b7297c6897a97c5c5af3b1c1592
 }
 
 // Uncomment the function you want to run below before deploying
 async function run() {
   try {
-    // await registerCanonicalInterchainToken();
-    // await deployRemoteCanonicalInterchainToken();
-    await transferTokens();
+    //     await registerCanonicalInterchainToken();
+    //     await deployRemoteCanonicalInterchainToken();
+    // await transferTokens();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

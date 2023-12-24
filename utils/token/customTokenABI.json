@@ -2,7 +2,17 @@
   {
     "inputs": [
       { "internalType": "string", "name": "name_", "type": "string" },
-      { "internalType": "string", "name": "symbol_", "type": "string" }
+      { "internalType": "string", "name": "symbol_", "type": "string" },
+      {
+        "internalType": "uint256",
+        "name": "initialBalance_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address payable",
+        "name": "feeReceiver_",
+        "type": "address"
+      }
     ],
     "stateMutability": "payable",
     "type": "constructor"

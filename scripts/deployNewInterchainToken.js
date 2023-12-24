@@ -1,5 +1,7 @@
 // Axelar chains config
-// https://github.com/axelarnetwork/axelar-contract-deployments/blob/d4b2a6ad23d3a24eaf5e94a5a2406e4a27c91431/axelar-chains-config/info/testnet.json
+// https://github.com/axelarnetwork/axelar-contract-deployments/blob/main/axelar-chains-config/info/testnet.json
+// Deploy a New Interchain Token
+// Use this command to run this file: npx hardhat run scripts/deployNewInterchainToken.js --network mumbai
 
 const hre = require("hardhat");
 const crypto = require("crypto");

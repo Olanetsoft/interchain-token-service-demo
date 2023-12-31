@@ -18,7 +18,7 @@ module.exports = {
       accounts: [PRIVATE_KEY],
     },
     bsc: {
-      url: "https://bnbsmartchain-testnet.infura.io/v3/70349dbebf0848d0a38b46a00e6269ac",
+      url: "https://endpoints.omniatech.io/v1/bsc/testnet/public",
       chainId: 97,
       accounts: [PRIVATE_KEY],
     },
@@ -33,8 +33,8 @@ module.exports = {
       accounts: [PRIVATE_KEY],
     },
     fantom: {
-      url: "https://fantom.api.onfinality.io/public",
-      chainId: 250,
+      url: "https://rpc.ankr.com/fantom_testnet",
+      chainId: 4002,
       accounts: [PRIVATE_KEY],
     },
     linea_goerli: {

@@ -27,13 +27,19 @@ module.exports = {
       chainId: 5,
       accounts: [PRIVATE_KEY],
     },
+    sepolia: {
+      url: "https://sepolia.infura.io/v3/70349dbebf0848d0a38b46a00e6269ac",
+      chainId: 11155111,
+      accounts: [PRIVATE_KEY],
+    },
     base: {
       url: "https://base-goerli.publicnode.com",
       chainId: 84531,
       accounts: [PRIVATE_KEY],
     },
     fantom: {
-      url: "https://rpc.ankr.com/fantom_testnet",
+      // url: "https://rpc.ankr.com/fantom_testnet",
+      url: "https://fantom.api.onfinality.io/public",
       chainId: 4002,
       accounts: [PRIVATE_KEY],
     },

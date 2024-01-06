@@ -1,7 +1,9 @@
 // Axelar chains config
 // https://github.com/axelarnetwork/axelar-contract-deployments/blob/main/axelar-chains-config/info/testnet.json
 // Deploy Custom Token
-// Use this command to run this file: npx hardhat run scripts/deployCustomInterchainToken.js --network fantom
+// Use this command to run this file:
+// For Sepolia: npx hardhat run scripts/deployCustomInterchainToken.js --network sepolia
+// For Binance: npx hardhat run scripts/deployCustomInterchainToken.js --network bsc
 
 const hre = require("hardhat");
 const crypto = require("crypto");
@@ -24,13 +26,14 @@ const interchainTokenServiceContractAddress =
 const interchainTokenFactoryContractAddress =
   "0x83a93500d23Fbc3e82B410aD07A6a9F7A0670D66";
 const tokenManagerAddress = "0xC1B09c9c16117417A1B414A52Dd92CF1f634e786";
-const fantomCustomTokenAddress = "0x4B641fEa8Ab2Df6fe004BbA56Ba7bd93a9Fd9a31";
-const polygonCustomTokenAddress = "0x5745049a77105dDFA6862c91259c5978075FF743";
+
+const sepoliaCustomTokenAddress = "0x4E703bd524eaA03F3685026a2428e3fDF258Da37";
+const binanceCustomTokenAddress = "0x7eBF876f04064A88ba67F4ba60E6eCE0BCCBc88E";
 
 // Initialize salt
 const salt = "0x" + crypto.randomBytes(32).toString("hex");
 
-// deploy TM on local chain : Fantom
+// deploy TM on local chain : Sepoli
 async function deployLocalTokenManager() {
   const [owner] = await ethers.getSigners();
 
@@ -51,7 +54,7 @@ async function deployLocalTokenManager() {
 
   const params = await tokenManagerContract.params(
     owner.address,
-    fantomCustomTokenAddress
+    sepoliaCustomTokenAddress
   );
 
   console.log("params: ", params);
@@ -78,15 +81,16 @@ async function deployLocalTokenManager() {
 
   console.log("expectedTokenManagerAddress: ", expectedTokenManagerAddress);
 
+  // ON Sepolia
   //   owner.address:  0x510e5EA32386B7C48C4DEEAC80e86859b5e2416C
-  // salt:  0x0e96f59b94934221b83ed8e8e1d186deadbcf3045f1f5626cb848a52bd467ead
-  // params:  0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000004b641fea8ab2df6fe004bba56ba7bd93a9fd9a310000000000000000000000000000000000000000000000000000000000000014510e5ea32386b7c48c4deeac80e86859b5e2416c000000000000000000000000
-  // txn_hash: '0xe43b8b41bd426200e12cc515c5af1cfe74b32c05865ed2001f6e613da6f546d1',
-  // tokenId:  0x580a9fca93f542fc1d5682923b2d0dab5742c6ce2b628978e06df21fa7810384
-  // expectedTokenManagerAddress:  0x0C6ae38B51F6b972D904e5c2633B9aA2ce23b88E
+  // salt:  0x5a3c82f6a0b4cab0f9be948dc6957b2149b2b74cbdb77fbf7730c2f9e0196344
+  // params:  0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000004e703bd524eaa03f3685026a2428e3fdf258da370000000000000000000000000000000000000000000000000000000000000014510e5ea32386b7c48c4deeac80e86859b5e2416c000000000000000000000000
+  // txn_hash: '0xe7884f23a11ecb6bfd37f9f662a47badacee96fe645d2c797ea42eec61182a83',
+  // tokenId:  0x3248e3cc8f51b22ec80f6f2bbe5c08ea5e92aeb54ed0d1b6ef19febc1c792250
+  // expectedTokenManagerAddress:  0x88EFC3788DdEF773cb99e2dBe25c55771E9D943b
 }
 
-// Deploy TM to remote chain: Avalanche
+// Deploy TM to remote chain: Binance
 async function deployRemoteTokenManager() {
   const [owner] = await ethers.getSigners();
 
@@ -106,14 +110,14 @@ async function deployRemoteTokenManager() {
 
   const params = await tokenManagerContract.params(
     owner.address,
-    polygonCustomTokenAddress
+    binanceCustomTokenAddress
   );
 
   console.log("params: ", params);
 
   const txn = await interchainTokenServiceContract.deployTokenManager(
-    "0x0e96f59b94934221b83ed8e8e1d186deadbcf3045f1f5626cb848a52bd467ead", // salt
-    "Polygon",
+    "0x5a3c82f6a0b4cab0f9be948dc6957b2149b2b74cbdb77fbf7730c2f9e0196344", // salt
+    "binance",
     MINT_BURN,
     params,
     ethers.utils.parseEther("0.01"),
@@ -124,7 +128,7 @@ async function deployRemoteTokenManager() {
 
   const tokenId = await interchainTokenServiceContract.interchainTokenId(
     owner.address,
-    "0x0e96f59b94934221b83ed8e8e1d186deadbcf3045f1f5626cb848a52bd467ead" // salt
+    "0x5a3c82f6a0b4cab0f9be948dc6957b2149b2b74cbdb77fbf7730c2f9e0196344" // salt
   );
 
   console.log("tokenId: ", tokenId);
@@ -134,19 +138,20 @@ async function deployRemoteTokenManager() {
 
   console.log("expectedTokenManagerAddress: ", expectedTokenManagerAddress);
 
+  // ON Sepolia
   //   owner.address:  0x510e5EA32386B7C48C4DEEAC80e86859b5e2416C
-  // params:  0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000005745049a77105ddfa6862c91259c5978075ff7430000000000000000000000000000000000000000000000000000000000000014510e5ea32386b7c48c4deeac80e86859b5e2416c000000000000000000000000
-  // txn_hash: '0x18cc0a9f4f4694831f265fca2cb98f07fe4577174d389d3fc3888c09c0e25a37',
-  // tokenId:  0x580a9fca93f542fc1d5682923b2d0dab5742c6ce2b628978e06df21fa7810384
-  // expectedTokenManagerAddress:  0x0C6ae38B51F6b972D904e5c2633B9aA2ce23b88E
+  // params:  0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000007ebf876f04064a88ba67f4ba60e6ece0bccbc88e0000000000000000000000000000000000000000000000000000000000000014510e5ea32386b7c48c4deeac80e86859b5e2416c000000000000000000000000
+  // txn_hash: ' g0x9d5720fcf70f5e205af80ee3d1a6c6f387d7c1cae2de769af4b91ef3fe5137f2',
+  // tokenId:  0x3248e3cc8f51b22ec80f6f2bbe5c08ea5e92aeb54ed0d1b6ef19febc1c792250
+  // expectedTokenManagerAddress:  0x88EFC3788DdEF773cb99e2dBe25c55771E9D943b
 }
 
-// Transfer Mintership on all chains to ITS : Fantom
-async function transferMintershipToITSOnFantom() {
+// Transfer Mintership on all chains to ITS : Sepolia
+async function transferMintershipToITSOnSepolia() {
   const [owner] = await ethers.getSigners();
 
   const TestMintableBurnableERC20Contract = new ethers.Contract(
-    fantomCustomTokenAddress,
+    sepoliaCustomTokenAddress,
     TestMintableBurnableERC20ContractABI,
     owner
   );
@@ -157,15 +162,17 @@ async function transferMintershipToITSOnFantom() {
   );
 
   console.log("Txn:  ", txn);
-  // 0xf72346a560d5ebaf3d66190852d13d35f5d09bf990018746b96d936f76336830
+
+  // ON Sepolia
+  //0x17ff510551c51eee8c825109a03fc515cab0941bc6cc485b0f9960f7f8ef39ed
 }
 
-// Transfer Mintership on all chains to ITS : Polygon
-async function transferMintershipToITSOnPolygon() {
+// Transfer Mintership on all chains to ITS : Binance
+async function transferMintershipToITSOnBinance() {
   const [owner] = await ethers.getSigners();
 
   const TestMintableBurnableERC20Contract = new ethers.Contract(
-    polygonCustomTokenAddress,
+    binanceCustomTokenAddress,
     TestMintableBurnableERC20ContractABI,
     owner
   );
@@ -176,10 +183,12 @@ async function transferMintershipToITSOnPolygon() {
   );
 
   console.log("Txn:  ", txn);
-  // 0x3646c73db38dcf28e3337ebf3da7624994f4bf4ff4df3f02883fd52083318a65
+
+  // ON Binance
+  // 0x2b4e46efd5054f853ac183c5911baf634fbbda3615bbfff476053d3662f87483
 }
 
-// Transfer tokens : Fantom -> Polygon
+// Transfer tokens : Sepolia -> Binance
 async function transferTokens() {
   const [owner] = await ethers.getSigners();
 
@@ -190,23 +199,24 @@ async function transferTokens() {
   );
 
   const transfer = await interchainTokenServiceContract.interchainTransfer(
-    "0x580a9fca93f542fc1d5682923b2d0dab5742c6ce2b628978e06df21fa7810384", // tokenId
-    "Polygon", // destination chain
+    "0x3248e3cc8f51b22ec80f6f2bbe5c08ea5e92aeb54ed0d1b6ef19febc1c792250", // tokenId
+    "binance", // destination chain
     "0x510e5EA32386B7C48C4DEEAC80e86859b5e2416C", // recipient
-    ethers.utils.parseEther("8"), // amount
+    ethers.utils.parseEther("4"), // amount
     "0x00", //metadata
-    ethers.utils.parseEther("0.03"), // gasValue
+    ethers.utils.parseEther("0.1"),
     {
       // Transaction options should be passed here as an object
       value: ethers.utils.parseEther("0.1"), // Sending ether as the transaction value
-      // gasLimit: 30000, // Specifying the gas limit
+      // gasLimit: 70000, // Specifying the gas limit
     }
   );
 
   console.log("transfer: ", transfer);
 
   // Interchain transfer transaction hash
-  // txn_hash: 0xab0195715ad79ee624224a2653cd6eedd2fb19d24a706146e25bb42e16366153
+  // txn_hash: 0xd2fc2cb79612acc43afc8cb9bf69332a34b996f749be4ad1135533e7f1752035
+  // https://testnet.axelarscan.io/gmp/0xd2fc2cb79612acc43afc8cb9bf69332a34b996f749be4ad1135533e7f1752035
 }
 
 // Uncomment the function you want to run below before deploying
@@ -214,10 +224,9 @@ async function run() {
   try {
     // await deployLocalTokenManager();
     // await deployRemoteTokenManager();
-    // await transferMintershipToITSOnFantom();
-    // await transferMintershipToITSOnPolygon()
-
-    await transferTokens();
+    // await transferMintershipToITSOnSepolia();
+    // await transferMintershipToITSOnBinance();
+    // await transferTokens();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
